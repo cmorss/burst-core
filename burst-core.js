@@ -72,14 +72,9 @@
     loaded        : {},
     timelineCount : 0,
     timeline      : function(name,start,end,speed,loop,callback)  {
-                      //  Checks to see if a timeline of this name already exists
-                      //  if it does, then immediately return it.
                       if ( this.timelines[name] ) {
                         return this.timelines[name];
                       }
-                      //  If we are creating a new timeline:
-                      //  increment the timeline count
-                      //  create and return a new timeline entry
                       this.timelineCount ++;
                       return this.timelines[name] = new Timeline(name,start,end,speed,loop,callback,this);
                     },
@@ -138,22 +133,11 @@
     shapes      : {},
     shapeCount  : 0,
     shape       : function(name,objectRef){
-                    if(typeof props == 'String'){
+                    if ( this.shapes[name] ) {
                       return this.shapes[name];
-                    }else{
-                      this.timelineCount ++;
-                      return this.shapes[name] = new Shape(name,objectRef,this);
                     }
-                  },
-    tracks      : {},
-    trackCount  : 0,
-    track       : function(name,parent){
-                    if(typeof props == 'String'){
-                      return this.tracks[name];
-                    }else{
-                      this.trackCount ++;
-                      return this.tracks[name] = new Track(name,this);
-                    }
+                    this.shapeCount ++;
+                    return this.shapes[name] = new Shape(name,objectRef,this);
                   },
     play        : function(){
                     this.frame += this.speed;
@@ -192,15 +176,12 @@
     tracks      : {},
     trackCount  : 0,
     track       : function(name,parent){
-                    if(typeof props == 'String'){
+                    if ( this.tracks[name] ) {
                       return this.tracks[name];
-                    }else{
-                      this.trackCount ++;
-                      return this.tracks[name] = new Track(name,this);
                     }
-                  },
-    timeline    : function(name,start,end,speed,loop){ return this.parent.parent.timeline.apply(this.parent.parent,[name,start,end,speed,loop,this.parent]); }, 
-    shape       : function(name,objectRef){ return this.parent.shape.apply(this.parent,[name,objectRef,this.parent]); }
+                    this.trackCount ++;
+                    return this.tracks[name] = new Track(name,this);
+                  }
   };
 
   // TRACK //
@@ -213,9 +194,8 @@
   Track.prototype = {
     keys        : [],
     key         : function(frame,value,easing){
-                    var thisKey   = this.keys[this.keys.length] = new Key(frame,value,easing,this), 
-                        keyIndex  = [], keyStack=[];
-                        
+                    var keyIndex  = [], keyStack=[], thisKey = this.keys[this.keys.length] = new Key(frame,value,easing,this);
+                                        console.log(    thisKey.parent.parent );
                     for(var i=0;i<this.keys.length;i++){
                       keyIndex[i]=this.keys[i].frame;
                     }
@@ -234,9 +214,6 @@
                     }
                     return thisKey;
                   },
-    timeline    : function(name,start,end,speed,loop){ return this.parent.parent.parent.timeline.apply(this.parent.parent.parent,[name,start,end,speed,loop,this.parent]); }, 
-    shape       : function(name,objectRef){ return this.parent.parent.shape.apply(this.parent.parent,[name,objectRef,this.parent]); },
-    track       : function(name){ return this.parent.track.apply(this.parent,[name,this.parent]); },
     play        : function( frame ){
                     var curKey, nextKey, val;
                     for(var i=0, l=this.keys.length; i<l; i++){
@@ -265,12 +242,11 @@
   };
   
   Key.prototype = {
-    timeline    : function(name,start,end,speed,loop){ return this.parent.parent.parent.parent.timeline.apply(this.parent.parent.parent.parent,[name,start,end,speed,loop,this.parent]); }, 
-    shape       : function(name,objectRef){ return this.parent.parent.parent.shape.apply(this.parent.parent.parent,[name,objectRef,this.parent]); },
-    track       : function(name){ return this.parent.parent.track.apply(this.parent.parent,[name,this.parent]); },
-    key         : function(frame,value,easing){ return this.parent.key.apply(this.parent,[frame,value,easing,this.parent]); }
-  };
+    shape       : function(name,objectRef){ return this.parent.parent.parent.shape.apply(this.parent.parent.parent,[name,objectRef]); },
+    track       : function(name){ return this.parent.parent.track.apply(this.parent.parent,[name]); },
+    key         : function(frame,value,easing){ return this.parent.key.apply(this.parent,[frame,value,easing]); }
+  }
  
   window.burst = new Burst();
   
-})();
+})(window);

@@ -5,33 +5,20 @@ function loaded(){
   var redBox = document.getElementById('redBox');
   var greenBox = document.getElementById('greenBox');
   
-  // Invoke Burst Controller
   burst
-    // Create a Timeline (name, start-frame, frames-length, speed-ratio, looping, callback)
-    .timeline('ArbitraryTimelineName',0,100,1,true,function(){ alert('All done!'); } ) // Callbacks do not fire on looping timelines
-      // Create a Shape Object (name, object-reference)
-      .shape('ArbitrarilyNamedRedBox',redBox.style)
-        // Create a Track (property-reference)
-        .track('left')            
-          // Create a Key (frame, value-of-referenced-property, easing-type)
-          .key(0,0,'inOutBounce')
-          // Create another Key: Keys can be created in any order
+    .timeline('myTimeline',0,100,1,true,function(){ alert('All done!'); } ) // Callbacks do not fire on looping timelines
+      .shape('redBox',redBox.style)
+       .track('left')
+          .key(0,0)
           .key(100,50)
-       // Create a second Shape with it's object reference
-      .shape('ArbitrarilyNamedGreenBox',greenBox.style)
-        // Create a Track (property-reference)
-        .track('top')            
-          // Create a Key (frame, value-of-referenced-property, easing-type)
-          .key(0,0,'inOutBounce')
-          // Create another Key: Keys can be created in any order
-          .key(50,50)
-        .track('width')
-          // Create a Key (frame, value-of-referenced-property, easing-type)
+      .shape('greenBox',greenBox.style)
+        .track('left')
           .key(0,50)
-          .key(50,50)
-          .key(75,200)
-          .key(100,50)
-  // Close the timeline declaration
+          .key(100,0)
+        .track('top')
+          .key(0,50)
+
+          
   ;
 
   // Load a timeline into the Burst Player
@@ -42,6 +29,8 @@ function loaded(){
   
   // Begin playback of all loaded timelines
   burst.play();  
+  
+//  console.log( burst.timeline('ArbitraryTimelineName').shape('greenBox').track('left') );
   
   // Stop playback of all loaded timelines
   // burst.stop();  

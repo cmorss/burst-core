@@ -169,13 +169,14 @@
     this.name       = name;
     this.objectRef  = objectRef;
     this.parent     = parent;
+    console.log(["Shape",name,parent]);
     return this;
   };
   
   Shape.prototype = {
     tracks      : {},
     trackCount  : 0,
-    track       : function(name,parent){
+    track       : function(name){                    
                     if ( this.tracks[name] ) {
                       return this.tracks[name];
                     }
@@ -188,6 +189,7 @@
   var Track = function(name,parent){
     this.name   = name;
     this.parent = parent;
+    console.log(["Track",name,parent]);    
     return this;
   };
   
@@ -195,7 +197,7 @@
     keys        : [],
     key         : function(frame,value,easing){
                     var keyIndex  = [], keyStack=[], thisKey = this.keys[this.keys.length] = new Key(frame,value,easing,this);
-                                        console.log(    thisKey.parent.parent );
+//                                        console.log(    thisKey.parent.parent );
                     for(var i=0;i<this.keys.length;i++){
                       keyIndex[i]=this.keys[i].frame;
                     }
@@ -238,13 +240,14 @@
     this.value  = value;
     this.easing = easing;
     this.parent = parent;
+    console.log(["Key",frame,parent]);
     return this;
   };
   
   Key.prototype = {
     shape       : function(name,objectRef){ return this.parent.parent.parent.shape.apply(this.parent.parent.parent,[name,objectRef]); },
-    track       : function(name){ return this.parent.parent.track.apply(this.parent.parent,[name]); },
-    key         : function(frame,value,easing){ return this.parent.key.apply(this.parent,[frame,value,easing]); }
+    //track       : function(name){ return this.parent.parent.track.call(this.parent.parent,name); },
+    //key         : function(frame,value,easing){ return this.parent.key.apply(this.parent,[frame,value,easing]); }
   }
  
   window.burst = new Burst();

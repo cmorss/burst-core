@@ -6,9 +6,19 @@ function loaded(){
   var greenBox = document.getElementById('greenBox');
   
   burst
-    .timeline('myTimeline',0,100,1,true,function(){ alert('All done!'); } ) // Callbacks do not fire on looping timelines
+    .timeline('myTimeline',0,100,1,true) // Callbacks do not fire on looping timelines
       .shape('redBox',redBox.style)
-       .track('left')
+        .track('left')
+          .key(0,0)
+      .shape('greenBox',greenBox.style)
+        .track('left')
+          .key(0,0)
+      
+  console.log( burst.timeline('myTimeline').shape('redBox').track('left') );
+  console.log( burst.timeline('myTimeline').shape('greenBox').track('left') );  
+  
+  /*
+      .track('left')
           .key(0,0)
           .key(100,50)
       .shape('greenBox',greenBox.style)
@@ -16,10 +26,9 @@ function loaded(){
           .key(0,50)
           .key(100,0)
         .track('top')
-          .key(0,50)
-
-          
+          .key(0,50)         
   ;
+  */
 
   // Load a timeline into the Burst Player
   burst.load('ArbitraryTimelineName');

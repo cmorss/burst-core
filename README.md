@@ -1,6 +1,8 @@
 ##Burst-Core 
 A JavaScript Timeline Animation Library
+
 Copyright F1LT3R © 2010, All Rights Reserved
+
 http://creativecommons.org/licenses/by-sa/3.0/
 * * *  
 

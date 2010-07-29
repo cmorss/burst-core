@@ -75,9 +75,9 @@
       deepref.frame();
     }, 1000 / this.fps );
   };
-  Burst.prototype.frame = function(){
+  Burst.prototype.frame = function( frame ){
     for( var i in this.loaded ){
-      this.loaded[i].play();
+      this.loaded[i].play( frame );
     }
   };
   Burst.prototype.stop = function(){
@@ -101,8 +101,8 @@
   Timeline.prototype.track = function(name,objRef,prop){
     return this.tracks[name]||(arguments.length>1?this.tracks[name]=new Track(name,objRef,prop,this):undefined);
   };
-  Timeline.prototype.play = function(){
-    this.frame += this.speed;
+  Timeline.prototype.play = function( frame ){
+    this.frame = frame || (this.frame += this.speed);
     if( this.loop ){
       if( this.frame >= this.end ){ this.frame = this.start; }
       if( this.frame <= this.start ){ this.frame = this.end; }
@@ -162,7 +162,7 @@
       return false;
     }
   };
-  Track.prototype.play = function(frame){
+  Track.prototype.play = function(frame){  
     var curKey, nextKey, val;
     for(var i=0, l=this.keys.length; i<l; i++){
       curKey = this.keys[i];

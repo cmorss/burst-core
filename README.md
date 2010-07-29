@@ -17,4 +17,5 @@ The Burst-Core brings time-line animation control to JavaScript. Based on the cl
 - Anything with values that change over time
 
 ###Demo
+<iframe src="http://code.bocoup.com/burst-core/example.html"></iframe>
 http://code.bocoup.com/burst-core/

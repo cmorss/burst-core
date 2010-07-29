@@ -1,12 +1,20 @@
-BURST-CORE
-by f1lt3r @ Bocoup
+##Burst-Core 
+A JavaScript Timeline Animation Library
+Copyright F1LT3R © 2010, All Rights Reserved
+http://creativecommons.org/licenses/by-sa/3.0/
+* * *  
 
-This is a quick first pass at re-writing the animation core of The Burst Engine for generic JS Object timeline control.
+###What does it do?
 
-This version is designed to be used with anything!! WebGL Objects, Processing JS Game Characters, DOM Objects, SVG Objects and even Audio Signals.
+The Burst-Core brings time-line animation control to JavaScript. Based on the classic structure: **Time-line > Track > Key-frame**, Burst-Core is suitable for complex, multi-layered, non-linear animations. Burst-Core also supports method-chaining and call-back architecture to support rich, interactive use cases.
 
-Developers will probably be used to various animation functions across a variety of libraries. The Burst Engine takes animation control one step further with Timeline > Object > Property-Track > KeyFrame animation, suitable for comlpex, multi-layered, non-linear animations.
+###What can it control?
 
-License: "Open Source Only" - You can *ONLY* use this code or any darivatives of this code in conjunction with other open source code. You may however ship this code with other proprietary code/scripts/software upon receving comfirmation of your written agreement stating that your corporate entity revokes its right to privacy, digital securiry and legal action against any of the contributors herein.
+- WebGL Objects
+- Processing JS Game Characters
+- DOM Objects
+- SVG Elements
+- Audio Signals
+- Anything with values that changes over time
 
 Demo:  http://code.bocoup.com/burst-core/

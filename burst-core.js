@@ -3,10 +3,6 @@
    License: Call me - http://bocoup.com */
 (function(window){
 
-  // CSS units for usage with DOM
-  //////////////////////////////////////////////////////////////////////////////
-  var units = ['%','in','cm','mm','em','ex','pt','pc','px'];
-
   // Array Sort
   //////////////////////////////////////////////////////////////////////////////
   function sortNumber(a,b){ return a - b };
@@ -94,6 +90,7 @@
   Timeline = function Timeline(name,start,end,speed,loop,callback,parent){
     this.name=name;
     this.start=this.frame=start;
+    this.end=end;
     this.speed=speed;
     this.loop=loop;
     this.callback=callback;
@@ -107,18 +104,18 @@
   Timeline.prototype.play = function(){
     this.frame += this.speed;
     if( this.loop ){
-      if( this.frame > this.end ){ this.frame = this.start; }
-      if( this.frame < this.start ){ this.frame = this.end; }
+      if( this.frame >= this.end ){ this.frame = this.start; }
+      if( this.frame <= this.start ){ this.frame = this.end; }
     }else{
-      if( this.frame > this.end){
+      if( this.frame >= this.end){
         this.frame = this.end;
         this.parent.unload(this.name);
-        this.callback();
+        this.callback?this.callback():0;
       }
-      if( this.frame < this.start ){
+      if( this.frame <= this.start ){
         this.frame = this.start;
         this.parent.unload(this.name);
-        this.callback();
+        this.callback?this.callback():0;
       }
     }
     for( var j in this.tracks ){
@@ -132,13 +129,7 @@
     this.name=name;
     this.objRef=objRef;
     this.prop=prop;
-    var initVal = this.objRef[this.prop];
-    for(var i=0,l=units.length;i<l;i++){
-      if(units[i] === initVal.substr(initVal.length-units[i].length,units[i].length)){
-        this.unit = units[i];
-        break;
-      };
-    }
+    this.unit = typeof this.objRef[this.prop] === 'number' ? undefined : this.objRef[this.prop].replace(/[.0-9]/g,'');
     this.parent=parent;
     this.keys=[];
     return this;
@@ -189,7 +180,7 @@
         val = curKey.value;
       }
     }
-    this.objRef[this.prop] = val + (function(u){ return u || 0 })(this.unit);
+    this.objRef[this.prop] = val + (this.unit||0);
   };
 
   // Key

@@ -7,19 +7,22 @@ function loaded(){
   var greenBox = document.getElementById('greenBox');
   
   burst
-    .timeline('myTimeline',0,100,1,true)
+    .timeline('myTimeline',1,100,1,false,function(){
+      burst.timeline('myTimeline').speed = burst.timeline('myTimeline').speed > 0 ? -1 : 1 ;
+      burst.load('myTimeline');
+    })
       .track('bounceRight',redBox.style,'left')
-        .key(0,0,'inOutBounce')
+        .key(1,0,'inOutBounce')
         .key(100,100)
       .track('slideRight',greenBox.style,'left')
-        .key(0,0,'linear')
+        .key(1,0,'linear')
         .key(100,100)
   ;
               
   burst.load('myTimeline');
   burst.play();
   
-}
+};
 
 addEventListener('DOMContentLoaded', function(){ loaded(); }, false);
 </script>

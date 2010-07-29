@@ -1,22 +1,18 @@
-/*
- 
-  BURST-CORE - by f1lt3r @ bocoup
-  License: "Open Source Only" - You can *ONLY* use this code or any darivatives
-            of this code in conjunction with other open source code. You may
-            however ship this code with other proprietary code/scripts/software
-            upon receving comfirmation of your written agreement stating that
-            your corporate entity revokes its right to privacy, digital securiry
-            and legal action against any of the contributors herein.
-  
-    track :: name,start,end,speed,loop,callback
-    shape :: name,objectRef
-    prop  :: name
-    key   :: frame,value,easing
-*/    
-(function(){  
-  
+/* Burst-Core
+   Copyright F1LT3R @ Bocoup
+   License: Call me - http://bocoup.com */
+(function(window){
+
+  // CSS units for usage with DOM
+  //////////////////////////////////////////////////////////////////////////////
+  var units = ['%','in','cm','mm','em','ex','pt','pc','px'];
+
+  // Array Sort
+  //////////////////////////////////////////////////////////////////////////////
   function sortNumber(a,b){ return a - b };
   
+  // Easing
+  //////////////////////////////////////////////////////////////////////////////
   var ease = {
     step          : function(x,t,b,c,d){ if(t==d){return d;}else{return 1;} },
     linear        : function(x,t,b,c,d){ return c*t/d + b; },
@@ -51,205 +47,171 @@
     outBounce     : function(x,t,b,c,d){ if((t/=d) < (1/2.75)){ return c*(7.5625*t*t) + b; } else if (t < (2/2.75)) { return c*(7.5625*(t-=(1.5/2.75))*t + .75) + b; } else if (t < (2.5/2.75)) { return c*(7.5625*(t-=(2.25/2.75))*t + .9375) + b; } else { return c*(7.5625*(t-=(2.625/2.75))*t + .984375) + b; } },
     inOutBounce   : function(x,t,b,c,d){ if(t < d/2) return ease['inBounce'](x, t*2, 0, c, d) * .5 + b; return ease['outBounce'](x, t*2-d, 0, c, d) * .5 + c*.5 + b; }
   };
-  
-  var engine = function engine(frame,prop,curKey,nextKey){
-    return ease[ curKey.easing || 'linear' ]( 0,
-      frame-curKey.frame,
-      curKey.value,
-      nextKey.value-curKey.value,
-      nextKey.frame-curKey.frame
-    );
+
+  // Burst Instance
+  //////////////////////////////////////////////////////////////////////////////
+  Burst = function Burst(){
+    this.name="Burst Instance";
+    this.timelines={};
+    this.loaded={};
+    this.fps = 30;    
   };
-     
-  // BURST //
-  var Burst = function()  { 
-    this.name = 'Burst Instance ' + new Date();
+  Burst.prototype.timeline = function(name,start,end,speed,loop,callback){
+    return this.timelines[name]||(arguments.length>1?this.timelines[name]=new Timeline(name,start,end,speed,loop,callback,this):undefined);
   };
-     
-  Burst.prototype = {
-    fps           : 30,
-    timelines     : {},
-    loaded        : {},
-    timelineCount : 0,
-    timeline      : function(name,start,end,speed,loop,callback)  {
-                      if ( this.timelines[name] ) {
-                        return this.timelines[name];
-                      }
-                      this.timelineCount ++;
-                      return this.timelines[name] = new Timeline(name,start,end,speed,loop,callback,this);
-                    },
-    
-    load: function( name ){
-      return this.loaded[name] || (function(){
-        for( i in this.timelines ){
-          if( this.timelines[i] ){            
-            return this.loaded[i] = this.timelines[i];
-          }else{
-            return this;
+  Burst.prototype.load = function( name ){
+    return this.loaded[name] || (function(){
+      for( i in this.timelines ){
+        if( this.timelines[i] ){            
+          return this.loaded[i] = this.timelines[i];
+        }else{
+          return this;
+        }
+      }
+    }).call(this);
+  };
+  Burst.prototype.unload = function( name ){
+    delete this.loaded[name];
+  };
+  Burst.prototype.play = function(){
+    var deepref = this;
+    this.interval = setInterval(function(){
+      deepref.frame();
+    }, 1000 / this.fps );
+  };
+  Burst.prototype.frame = function(){
+    for( var i in this.loaded ){
+      this.loaded[i].play();
+    }
+  };
+  Burst.prototype.stop = function(){
+    clearInterval( this.interval );
+    delete this.interval;
+  };
+
+  // Timeline
+  //////////////////////////////////////////////////////////////////////////////
+  Timeline = function Timeline(name,start,end,speed,loop,callback,parent){
+    this.name=name;
+    this.start=this.frame=start;
+    this.speed=speed;
+    this.loop=loop;
+    this.callback=callback;
+    this.parent=parent;
+    this.tracks={};
+    return this;
+  };
+  Timeline.prototype.track = function(name,objRef,prop){
+    return this.tracks[name]||(arguments.length>1?this.tracks[name]=new Track(name,objRef,prop,this):undefined);
+  };
+  Timeline.prototype.play = function(){
+    this.frame += this.speed;
+    if( this.loop ){
+      if( this.frame > this.end ){ this.frame = this.start; }
+      if( this.frame < this.start ){ this.frame = this.end; }
+    }else{
+      if( this.frame > this.end){
+        this.frame = this.end;
+        this.parent.unload(this.name);
+        this.callback();
+      }
+      if( this.frame < this.start ){
+        this.frame = this.start;
+        this.parent.unload(this.name);
+        this.callback();
+      }
+    }
+    for( var j in this.tracks ){
+      this.tracks[j].play( this.frame );
+    }
+  };  
+
+  // Track
+  //////////////////////////////////////////////////////////////////////////////
+  Track = function Track(name,objRef,prop,parent){
+    this.name=name;
+    this.objRef=objRef;
+    this.prop=prop;
+    var initVal = this.objRef[this.prop];
+    for(var i=0,l=units.length;i<l;i++){
+      if(units[i] === initVal.substr(initVal.length-units[i].length,units[i].length)){
+        this.unit = units[i];
+        break;
+      };
+    }
+    this.parent=parent;
+    this.keys=[];
+    return this;
+  };
+  Track.prototype.key = function(frame,value,ease){
+    for(var i=0,l=this.keys.length;i<l;i++){
+      if(this.keys[i].frame === frame){
+        return this.keys[i];
+      }
+    }
+    if(arguments.length>1){
+      var keyIndex=[], keyStack=[], thisKey = this.keys[this.keys.length] = new Key(frame,value,ease,this);
+      for(var i=0;i<this.keys.length;i++){
+        keyIndex[i]=this.keys[i].frame;
+      }
+      keyIndex.sort(sortNumber);      
+      for(var i=0;i<this.keys.length;i++){
+        for(var j=0;j<this.keys.length;j++){
+          if(keyIndex[i]==this.keys[j].frame){
+            keyStack[i]=this.keys[j];
           }
         }
-      }).call(this);
-    },
-
-    unload: function( name ){
-      delete this.loaded[name];
-    },
-
-    play: function(){
-      var deepref = this;
-      this.interval = setInterval(function(){
-        deepref.frame();
-      }, 1000 / this.fps );
-    },        
-    
-    frame: function(){
-      for( var i in this.loaded ){
-        this.loaded[i].play();
       }
-    },
-    
-    
-    stop: function(){
-      clearInterval( this.interval );
-      delete this.interval;
+      this.keys=[];
+      for(var i=0, l=keyStack.length; i< l; i++){
+        this.keys[i] = keyStack[i];
+      }
+      return thisKey;
+    }else{
+      return false;
     }
-    
-  };  
-  
-  // TIMELINE //
-  var Timeline = function(name,start,end,speed,loop,callback,parent){
-    this.name   = name;
-    this.start  = start;
-    this.end    = end;
-    this.speed  = speed;
-    this.loop   = loop;
-    this.parent = parent;
-    this.callback = callback;
-    this.frame  = start;
-    return this;
   };
-  
-  Timeline.prototype = {
-    shapes      : {},
-    shapeCount  : 0,
-    shape       : function(name,objectRef){
-                    if ( this.shapes[name] ) {
-                      return this.shapes[name];
-                    }
-                    this.shapeCount ++;
-                    return this.shapes[name] = new Shape(name,objectRef,this);
-                  },
-    play        : function(){
-                    this.frame += this.speed;
-                    if( this.loop ){
-                      if( this.frame > this.end ){ this.frame = this.start; }
-                      if( this.frame < this.start ){ this.frame = this.end; }
-                    }else{
-                      if( this.frame > this.end){
-                        this.frame = this.end;
-                        this.parent.unload(this.name);
-                        this.callback();
-                      }
-                      if( this.frame < this.start ){
-                        this.frame = this.start;
-                        this.parent.unload(this.name);
-                        this.callback();
-                      }
-                    }
-                    for( var j in this.shapes ){
-                      for( var k in this.shapes[j].tracks ){
-                        this.shapes[j].tracks[k].play( this.frame );
-                      }
-                    }
-                  }
-  };  
-  
-  // SHAPE //
-  var Shape = function(name,objectRef,parent){
-    this.name       = name;
-    this.objectRef  = objectRef;
-    this.parent     = parent;
-    console.log(["Shape",name,parent]);
-    return this;
-  };
-  
-  Shape.prototype = {
-    tracks      : {},
-    trackCount  : 0,
-    track       : function(name){                    
-                    if ( this.tracks[name] ) {
-                      return this.tracks[name];
-                    }
-                    this.trackCount ++;
-                    return this.tracks[name] = new Track(name,this);
-                  }
+  Track.prototype.play = function(frame){
+    var curKey, nextKey, val;
+    for(var i=0, l=this.keys.length; i<l; i++){
+      curKey = this.keys[i];
+      nextKey = this.keys[i+1];
+      if(nextKey === undefined && i+1 > l-1){
+        nextKey = this.keys[l-1];
+      }
+      if( frame >= curKey.frame && frame < nextKey.frame ){
+        val = ease[ curKey.ease ]( 0,
+          frame-curKey.frame,
+          curKey.value,
+          nextKey.value-curKey.value,
+          nextKey.frame-curKey.frame );
+      }else if( frame >= nextKey.frame || frame === 0 ){
+        val = curKey.value;
+      }
+    }
+    this.objRef[this.prop] = val + (function(u){ return u || 0 })(this.unit);
   };
 
-  // TRACK //
-  var Track = function(name,parent){
-    this.name   = name;
-    this.parent = parent;
-    console.log(["Track",name,parent]);    
+  // Key
+  //////////////////////////////////////////////////////////////////////////////
+  Key = function Key(frame,value,ease,parent){
+    this.frame=frame;
+    this.value=value;
+    this.ease=ease;
+    this.parent=parent;
     return this;
   };
-  
-  Track.prototype = {
-    keys        : [],
-    key         : function(frame,value,easing){
-                    var keyIndex  = [], keyStack=[], thisKey = this.keys[this.keys.length] = new Key(frame,value,easing,this);
-//                                        console.log(    thisKey.parent.parent );
-                    for(var i=0;i<this.keys.length;i++){
-                      keyIndex[i]=this.keys[i].frame;
-                    }
-                    keyIndex.sort(sortNumber);
-                    
-                    for(var i=0;i<this.keys.length;i++){
-                      for(var j=0;j<this.keys.length;j++){
-                        if(keyIndex[i]==this.keys[j].frame){
-                          keyStack[i]=this.keys[j];
-                        }
-                      }
-                    }
-                    this.keys=[];
-                    for(var i=0, l=keyStack.length; i< l; i++){
-                      this.keys[i] = keyStack[i];
-                    }
-                    return thisKey;
-                  },
-    play        : function( frame ){
-                    var curKey, nextKey, val;
-                    for(var i=0, l=this.keys.length; i<l; i++){
-                      curKey = this.keys[i];
-                      nextKey = this.keys[i+1];
-                      if(nextKey === undefined && i+1 > l-1){
-                        nextKey = this.keys[l-1];
-                      }
-                      if( frame >= curKey.frame && frame < nextKey.frame ){
-                        val = engine(frame, this.name, curKey, nextKey);
-                      }else if( frame >= nextKey.frame || frame === 0 ){
-                        val = curKey.value;
-                      }
-                    }
-                    this.parent.objectRef[this.name] = val;
-                  }
+  Key.prototype.track=function(name,objRef,prop){
+    var timeline = this.parent.parent;
+    return timeline.track.call(timeline,name,objRef,prop);
   };
-
-  // KEY //
-  var Key = function(frame,value,easing,parent){
-    this.frame = frame;
-    this.value  = value;
-    this.easing = easing;
-    this.parent = parent;
-    console.log(["Key",frame,parent]);
-    return this;
+  Key.prototype.key=function(name,objRef){
+    var track = this.parent;
+    return track.key.call(track,name,objRef);
   };
   
-  Key.prototype = {
-    shape       : function(name,objectRef){ return this.parent.parent.parent.shape.apply(this.parent.parent.parent,[name,objectRef]); },
-    //track       : function(name){ return this.parent.parent.track.call(this.parent.parent,name); },
-    //key         : function(frame,value,easing){ return this.parent.key.apply(this.parent,[frame,value,easing]); }
-  }
- 
+  // Instantiation
+  //////////////////////////////////////////////////////////////////////////////
   window.burst = new Burst();
   
 })(window);

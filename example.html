@@ -1,3 +1,4 @@
+<!doctype html>
 <script src="burst-core.js"></script>
 <script>
 function loaded(){
@@ -6,48 +7,22 @@ function loaded(){
   var greenBox = document.getElementById('greenBox');
   
   burst
-    .timeline('myTimeline',0,100,1,true) // Callbacks do not fire on looping timelines
-      .shape('redBox',redBox.style)
-        .track('left')
-          .key(0,0)
-      .shape('greenBox',greenBox.style)
-        .track('left')
-          .key(0,0)
-      
-  console.log( burst.timeline('myTimeline').shape('redBox').track('left') );
-  console.log( burst.timeline('myTimeline').shape('greenBox').track('left') );  
-  
-  /*
-      .track('left')
-          .key(0,0)
-          .key(100,50)
-      .shape('greenBox',greenBox.style)
-        .track('left')
-          .key(0,50)
-          .key(100,0)
-        .track('top')
-          .key(0,50)         
+    .timeline('myTimeline',0,100,1,true)
+      .track('bounceRight',redBox.style,'left')
+        .key(0,0,'inOutBounce')
+        .key(100,100)
+      .track('slideRight',greenBox.style,'left')
+        .key(0,0,'linear')
+        .key(100,100)
   ;
-  */
-
-  // Load a timeline into the Burst Player
-  burst.load('ArbitraryTimelineName');
+              
+  burst.load('myTimeline');
+  burst.play();
   
-  // Unload a timeline from the Burst Player
-  //burst.unload('ArbitraryTimelineName');
-  
-  // Begin playback of all loaded timelines
-  burst.play();  
-  
-//  console.log( burst.timeline('ArbitraryTimelineName').shape('greenBox').track('left') );
-  
-  // Stop playback of all loaded timelines
-  // burst.stop();  
-
 }
 
 addEventListener('DOMContentLoaded', function(){ loaded(); }, false);
 </script>
 
-<div id="redBox" style="background:red;position:absolute;left:0;top:0;width:50px;height:50px"></div>
-<div id="greenBox" style="background:limegreen;position:absolute;left:50;top:0;width:50px;height:50px"></div>
+<div id="redBox" style="background:red;position:absolute;left:0px;top:0px;width:50px;height:50px"></div>
+<div id="greenBox" style="background:limegreen;position:absolute;left:50px;top:50px;width:50px;height:50px"></div>

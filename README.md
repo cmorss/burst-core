@@ -1,10 +1,7 @@
-##Burst-Core 
-A JavaScript Timeline Animation Library
-
-Copyright F1LT3R © 2010, All Rights Reserved
-
+##Burst-Core
+A Timeline Animation Library for JavaScript<br />
+Copyright F1LT3R © 2010, All Rights Reserved<br />
 http://creativecommons.org/licenses/by-sa/3.0/
-* * *  
 
 ###What does it do?
 
@@ -17,6 +14,7 @@ The Burst-Core brings time-line animation control to JavaScript. Based on the cl
 - DOM Objects
 - SVG Elements
 - Audio Signals
-- Anything with values that changes over time
+- Anything with values that change over time
 
-Demo:  http://code.bocoup.com/burst-core/
+###Demo
+http://code.bocoup.com/burst-core/

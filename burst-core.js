@@ -1,7 +1,7 @@
   /* Burst-Core
      Copyright F1LT3R @ Bocoup
      License: Call me - http://bocoup.com */
-(function(){
+(function( global ){
 
   // Array Sort
   //////////////////////////////////////////////////////////////////////////////
@@ -13,7 +13,6 @@
     linear        : function(x,t,b,c,d){ return c*t/d + b; },
     inOutQuad     : function(x,t,b,c,d){ if((t/=d/2) < 1){ return c/2*t*t + b;}else{ return -c/2 * ((--t)*(t-2) - 1) + b; }},
     inOutCubic    : function(x,t,b,c,d){ if((t/=d/2) < 1){ return c/2*t*t*t + b;}else{ return c/2*((t-=2)*t*t + 2) + b; }},
-    inOutElastic  : function(x,t,b,c,d){ var s=1.70158;var p=0;var a=c; if (t===0){ return b;}  if ((t/=d/2)==2){ return b+c;}  if (!p){ p=d*(0.3*1.5);} if (a < Math.abs(c)) { a=c; s=p/4; } else{ s = p/(2*Math.PI) * Math.asin (c/a); if (t < 1){ return -0.5*(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )) + b;}else{ return a*Math.pow(2,-10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )*0.5 + c + b; }}},
     inBounce      : function(x,t,b,c,d){ return c - ease.outBounce( x, d-t, 0, c, d) + b; },
     outBounce     : function(x,t,b,c,d){ if((t/=d) < (1/2.75)){ return c*(7.5625*t*t) + b; } else if (t < (2/2.75)) { return c*(7.5625*(t-=(1.5/2.75))*t + 0.75) + b; } else if (t < (2.5/2.75)) { return c*(7.5625*(t-=(2.25/2.75))*t + 0.9375) + b; } else { return c*(7.5625*(t-=(2.625/2.75))*t + 0.984375) + b; } },
     inOutBounce   : function(x,t,b,c,d){ if(t < d/2){ return ease.inBounce(x, t*2, 0, c, d) * 0.5 + b;}else{ return ease.outBounce(x, t*2-d, 0, c, d) * 0.5 + c*0.5 + b; }}
@@ -24,12 +23,16 @@
   var Burst = function Burst(){
     this.timelines={};
     this.loaded={};
-    this.fps = 30;    
+    this.fps = 30;
+    this.timelineCount = 0;
     this.onframe=undefined;
   };
+
   Burst.prototype.timeline = function(name,start,end,speed,loop,callback){
+    this.timelineCount++;
     return this.timelines[name]||(arguments.length>1?this.timelines[name]=new Timeline(name,start,end,speed,loop,callback,this):undefined);
   };
+
   Burst.prototype.load = function( name ){
     return this.loaded[name] || (function(){
       for(var i in this.timelines ){
@@ -41,15 +44,18 @@
       }
     }).call(this);
   };
+
   Burst.prototype.unload = function( name ){
     delete this.loaded[name];
   };
+
   Burst.prototype.play = function(){
     var deepref = this;
     this.interval = window.setInterval(function(){
       deepref.frame();
     }, 1000 / this.fps );
   };
+
   Burst.prototype.frame = function( frame ){
     if(this.onframe){this.onframe();}
     for( var i in this.loaded ){
@@ -58,6 +64,7 @@
       }
     }
   };
+
   Burst.prototype.stop = function(){
     window.clearInterval( this.interval );
     delete this.interval;
@@ -73,12 +80,14 @@
     this.loop=loop;
     this.callback=callback;
     this.parent=parent;
-    this.tracks={};
+    this.objects={};
     return this;
   };
-  Timeline.prototype.track = function(name,objRef,prop){
-    return this.tracks[name]||(arguments.length>1?this.tracks[name]=new Track(name,objRef,prop,this):undefined);
-  };
+
+  Timeline.prototype.obj = function(name,objRef){
+    return this.objects[name]||(this.objects[name]=new Obj(name,objRef,this));
+  }
+  
   Timeline.prototype.play = function( frame ){
     this.frame = frame || (this.frame += this.speed);
     if( this.loop ){
@@ -96,24 +105,40 @@
         if(this.callback){this.callback();}
       }
     }
-    for( var j in this.tracks ){
-      if(this.hasOwnProperty("tracks")){
-        this.tracks[j].play( this.frame );
+    var thisObj;
+    for( var i in this.objects ){
+      thisObject = this.objects[i];
+      for( var j in thisObject.tracks ){
+        thisObject.tracks[j].play( this.frame );
       }
-    }
+    }    
+    if( this.always ){ this.always.call(this); }
   };  
+
+  // Object / "Actor"
+  //////////////////////////////////////////////////////////////////////////////
+  var Obj = function Obj(name,objRef,parent){
+    this.name=name;
+    this.objRef=objRef;
+    this.parent=parent;
+    this.tracks={};
+    return this;
+  };
+  
+  Obj.prototype.track = function(prop){
+    return this.tracks[prop]||(this.tracks[prop]=new Track(prop,this));
+  };
 
   // Track
   //////////////////////////////////////////////////////////////////////////////
-  var Track = function Track(name,objRef,prop,parent){
-    this.name=name;
-    this.objRef=objRef;
+  var Track = function Track(prop,parent){
     this.prop=prop;
-    this.unit = typeof this.objRef[this.prop] === 'number' ? undefined : this.objRef[this.prop].replace(/[.0-9]/g,'');
     this.parent=parent;
     this.keys=[];
+    this.unit=typeof this.parent.objRef[prop] === 'number' ? undefined : this.parent.objRef[prop].replace(/[.0-9]/g,'');
     return this;
   };
+  
   Track.prototype.key = function(frame,value,ease){
     for(var i=0,l=this.keys.length;i<l;i++){
       if(this.keys[i].frame === frame){
@@ -142,7 +167,8 @@
       return false;
     }
   };
-  Track.prototype.play = function(frame){  
+
+  Track.prototype.play = function(frame){
     var curKey, nextKey, val;
     for(var i=0, l=this.keys.length; i<l; i++){
       curKey = this.keys[i];
@@ -151,16 +177,16 @@
         nextKey = this.keys[l-1];
       }
       if( frame >= curKey.frame && frame < nextKey.frame ){
-        val = ease[ curKey.ease ]( 0,
+         val = ease[ curKey.ease ]( 0,
           frame-curKey.frame,
           curKey.value,
           nextKey.value-curKey.value,
-          nextKey.frame-curKey.frame );
+          nextKey.frame-curKey.frame );                 
       }else if( frame >= nextKey.frame || frame === 0 ){
         val = curKey.value;
       }
-    }
-    this.objRef[this.prop] = val + (this.unit||0);
+    }    
+    this.parent.objRef[this.prop] = val + (this.unit||0);
   };
 
   // Key
@@ -168,21 +194,28 @@
   var Key = function Key(frame,value,ease,parent){
     this.frame=frame;
     this.value=value;
-    this.ease=ease||'linear';
+    this.ease=ease||'inOutCubic';
     this.parent=parent;
     return this;
   };
-  Key.prototype.track=function(name,objRef,prop){
-    var timeline = this.parent.parent;
-    return timeline.track.call(timeline,name,objRef,prop);
+
+  Key.prototype.obj=function(name,objRef){
+    var timeline = this.parent.parent.parent;
+    return timeline.obj.call(timeline,name,objRef);
   };
-  Key.prototype.key=function(name,objRef){
+
+  Key.prototype.track=function(name,objRef,prop){
+    var obj = this.parent.parent;
+    return obj.track.call(obj,name,objRef,prop);
+  };
+
+  Key.prototype.key=function(frame,value,ease){
     var track = this.parent;
-    return track.key.call(track,name,objRef);
+    return track.key.call(track,frame,value,ease);
   };
 
   // Instantiation
   //////////////////////////////////////////////////////////////////////////////
-  window.burst = new Burst();
+  global.burst = new Burst();
 
-})();
+})( this );

@@ -1,0 +1,62 @@
+<style>
+  body{background:black;color:white;}
+  #wrapper{width:400px;margin:0 auto;font-size:12px;font-family:Consolas,MonoSpace,Console;}
+  canvas{margin-bottom:5px;}
+  #points{width:300px;float:left;}
+  button{float:right;font-size:10px;font-family:Consolas,MonoSpace,Console;padding:0;}
+  h1{margin-bottom:0;}
+  .info{margin-top:40px;background:#ccc;padding:10px 20px;color:black;border:5px dashed #888;}
+  pre{font-size:.8em;border:1px dotted grey;padding:10px;}
+</style>
+<script src="processing.js"></script>
+<script src="ninja.classes.lib"></script>
+<script src="../../burst-core.js"></script>
+
+<div id="wrapper">
+  
+  <canvas data-src="ninja.pjs" width="400" height="300">
+    <a href="http://getfirefox.com">Get Firefox!</a>
+  </canvas>
+  <div id="points"></div>
+  <button id="restart">Restart</button>
+  
+  <div class="info">
+    <h1>JavaScript Ninja</h1>
+    <i>a <a href="http://processingjs.org">processing.js</a> ninja controled by <a href="http://github.com/f1lt3r/burst-core">Burst-Core</a></i>
+    <p>The ninja character in this demo is being controlled by the Burst Engine
+    core. Burst-Core brings time-line animation control to JavaScript. Based on 
+    the classic structure: <b>Time-line > Track > Key-frame</b>, Burst-Core is
+    suitable for complex, multi-layered, non-linear animations. Burst-Core also 
+    supports  method-chaining and call-back architecture to support rich, 
+    interactive use cases.</p>
+
+<p><b>Source code:</b> the following is the Burst-Core code from the Processing.js script</p>
+<pre>
+// BURST-CORE CHARACTER CONTROL
+burst.timeline("ninja",1,40,0.05,true)
+  .track("horzMouse",p,"mouseX")
+    .key(1,0)
+    .key(5,400)
+    .key(10,100)
+    .key(15,300)
+    .key(20,0)
+    .key(25,400)
+    .key(30,000)
+    .key(35,400)
+    .key(40,100)
+  .track("vertMouse",p,"mouseY")
+    .key(1,0,"outBounce")
+    .key(20,300)
+    .key(30,140)
+    .key(35,100,"inOutElastic")    
+    .key(40,4)
+;
+burst.onframe = function(){ p.mouseMoved() };
+burst.load('ninja');
+burst.play();
+</pre>
+  </div>
+
+  <p>Join: <a href="irc://irc.mozilla.org/processing.js">irc://irc.mozilla.org/processing.js</a></p>
+  
+</div>

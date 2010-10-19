@@ -18,5 +18,8 @@ The Burst-Core brings time-line animation control to JavaScript. Based on the cl
 
 ###Demo
 
-- **CSS**: http://code.bocoup.com/burst-core/examples/css-demo/
-- **Processing.js**: http://code.bocoup.com/burst-core/examples/processing-js/
+**CSS:**
+http://code.bocoup.com/burst-core/examples/css-demo/
+
+**Processing.js:**
+http://code.bocoup.com/burst-core/examples/processing-js/

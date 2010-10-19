@@ -11,8 +11,6 @@ The Burst-Core brings time-line animation control to JavaScript. Based on the cl
 
 Here is an example that will create a timeline, grab a DIV from the DOM and animate it over 100 frame with a 'outBounce' easing.
 
-```js
-
   // Timeline args: timelineName, startFrame, endFrame, speedRatio, loop, callBack
   burst.timeline( 'myTimeline', 0, 100, 1, false, function(){ alert('finished!'); )
 
@@ -27,8 +25,6 @@ Here is an example that will create a timeline, grab a DIV from the DOM and anim
         .key( 100, 100 )
         
   ;
-
-```
 
 ###What can it control?
 

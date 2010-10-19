@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<script src="../../burst-core.js"></script>
+<script>
+function loaded(){
+ 
+  var redBox = document.getElementById('redBox');
+  var greenBox = document.getElementById('greenBox');
+  
+  burst
+    .timeline('myTimeline',1,100,1,false,function(){
+      burst.timeline('myTimeline').speed = burst.timeline('myTimeline').speed > 0 ? -1 : 1 ;
+      burst.load('myTimeline');
+    })
+      .obj('redbox',redBox.style)
+        .track('left')
+          .key(1,0,'inOutBounce')
+          .key(100,100)
+      .obj('greenbox',greenBox.style)
+        .track('left')
+          .key(1,0,'linear')
+          .key(100,100)
+  ;
+              
+  burst.load('myTimeline');
+  burst.play();
+  
+};
+
+addEventListener('DOMContentLoaded', function(){ loaded(); }, false);
+</script>
+
+<div id="redBox" style="background:red;position:absolute;left:0px;top:0px;width:50px;height:50px"></div>
+<div id="greenBox" style="background:limegreen;position:absolute;left:0px;top:50px;width:50px;height:50px"></div>

@@ -5,7 +5,7 @@
 
   // Array Sort
   //////////////////////////////////////////////////////////////////////////////
-  function sortNumber(a,b){ return a - b; }
+  var sortNumber = function(a,b){ return a - b; };
 
   // Easing
   //////////////////////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@
 
   Burst.prototype.play = function(){
     var deepref = this;
-    this.interval = window.setInterval(function(){
+    this.interval = global.setInterval(function(){
       deepref.frame();
     }, 1000 / this.fps );
   };
@@ -59,14 +59,14 @@
   Burst.prototype.frame = function( frame ){
     if(this.onframe){this.onframe();}
     for( var i in this.loaded ){
-      if(this.hasOwnProperty("loaded")){
+      if(this.hasOwnProperty('loaded')){
         this.loaded[i].play( frame );
       }
     }
   };
 
   Burst.prototype.stop = function(){
-    window.clearInterval( this.interval );
+    global.clearInterval( this.interval );
     delete this.interval;
   };
 
@@ -86,7 +86,7 @@
 
   Timeline.prototype.obj = function(name,objRef){
     return this.objects[name]||(this.objects[name]=new Obj(name,objRef,this));
-  }
+  };
   
   Timeline.prototype.play = function( frame ){
     this.frame = frame || (this.frame += this.speed);
@@ -105,11 +105,15 @@
         if(this.callback){this.callback();}
       }
     }
-    var thisObj;
+    var thisObject;
     for( var i in this.objects ){
-      thisObject = this.objects[i];
-      for( var j in thisObject.tracks ){
-        thisObject.tracks[j].play( this.frame );
+      if( this.hasOwnProperty('objects') ){
+        thisObject = this.objects[i];
+        for( var j in thisObject.tracks ){
+          if( thisObject.hasOwnProperty('tracks') ){
+            thisObject.tracks[j].play( this.frame );
+          }
+        }
       }
     }    
     if( this.always ){ this.always.call(this); }

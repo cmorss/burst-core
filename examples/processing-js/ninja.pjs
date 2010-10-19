@@ -5,28 +5,28 @@
 //       is in Firefox. This game works in Firefox, Safari, Opera and Chrome.
 
 // BURST-CORE CHARACTER CONTROL
-burst.timeline("ninja",1,40,0.05,true)
-  .track("horzMouse",p,"mouseX")
-    .key(1,0)
-    .key(5,400)
-    .key(10,100)
-    .key(15,300)
-    .key(20,0)
-    .key(25,400)
-    .key(30,000)
-    .key(35,400)
-    .key(40,100)
-  .track("vertMouse",p,"mouseY")
-    .key(1,0,"outBounce")
-    .key(20,300)
-    .key(30,140)
-    .key(35,100,"inOutElastic")    
-    .key(40,4)
+burst.timeline("ninja",1,40,1,true)
+  .obj("processing_instance", p)
+    .track("mouseX")
+      .key(1,0)
+      .key(5,400)
+      .key(10,100)
+      .key(15,300)
+      .key(20,0)
+      .key(25,400)
+      .key(30,000)
+      .key(35,400)
+      .key(40,100)
+    .track("mouseY")
+      .key(1,0,"outBounce")
+      .key(20,300)
+      .key(30,140)
+      .key(35,100,"inOutBounce")
+      .key(40,4)
 ;
 burst.onframe = function(){ p.mouseMoved() };
 burst.load('ninja');
 burst.play();
-
 
 // Set Ninja Classes
 Spring head = new Spring({ x:0, y:0, s:60, d:0.80, m:8, k_in:9.1 });

@@ -5,7 +5,7 @@ http://creativecommons.org/licenses/by-sa/3.0/
 
 ###What does it do?
 
-The Burst-Core brings time-line animation control to JavaScript. Based on the classic structure: **Time-line > Track > Key-frame**, Burst-Core is suitable for complex, multi-layered, non-linear animations. Burst-Core also supports method-chaining and call-back architecture to support rich, interactive use cases.
+The Burst-Core brings time-line animation control to JavaScript. Based on the classic structure: **Time-line > Object > Track > Key-frame**, Burst-Core is suitable for complex, multi-layered, non-linear animations. Burst-Core also supports method-chaining and call-back architecture to support rich, interactive use cases.
 
 ###What can it control?
 

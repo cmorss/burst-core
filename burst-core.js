@@ -5,7 +5,7 @@
 
   // Array Sort
   //////////////////////////////////////////////////////////////////////////////
-  var sortNumber = function(a,b){ return a - b; };
+  function sortNumber(a,b){ return a - b; }
 
   // Easing
   //////////////////////////////////////////////////////////////////////////////
@@ -29,20 +29,18 @@
   };
 
   Burst.prototype.timeline = function(name,start,end,speed,loop,callback){
-    this.timelineCount++;
     return this.timelines[name]||(arguments.length>1?this.timelines[name]=new Timeline(name,start,end,speed,loop,callback,this):undefined);
   };
 
-  Burst.prototype.load = function( name ){
+  Burst.prototype.load = function( name ){  
     return this.loaded[name] || (function(){
       for(var i in this.timelines ){
-        if( this.timelines[i] ){            
+        if( this.timelines[i].name === name ){
           return (this.loaded[i] = this.timelines[i]);
-        }else{
-          return this;
         }
       }
     }).call(this);
+    return false;
   };
 
   Burst.prototype.unload = function( name ){
@@ -51,7 +49,7 @@
 
   Burst.prototype.play = function(){
     var deepref = this;
-    this.interval = global.setInterval(function(){
+    this.interval = window.setInterval(function(){
       deepref.frame();
     }, 1000 / this.fps );
   };
@@ -59,20 +57,21 @@
   Burst.prototype.frame = function( frame ){
     if(this.onframe){this.onframe();}
     for( var i in this.loaded ){
-      if(this.hasOwnProperty('loaded')){
+      if(this.hasOwnProperty("loaded")){
         this.loaded[i].play( frame );
       }
     }
   };
 
   Burst.prototype.stop = function(){
-    global.clearInterval( this.interval );
+    window.clearInterval( this.interval );
     delete this.interval;
   };
 
   // Timeline
   //////////////////////////////////////////////////////////////////////////////
   var Timeline = function Timeline(name,start,end,speed,loop,callback,parent){
+    parent.timelineCount++;
     this.name=name;
     this.start=this.frame=start;
     this.end=end;
@@ -86,7 +85,7 @@
 
   Timeline.prototype.obj = function(name,objRef){
     return this.objects[name]||(this.objects[name]=new Obj(name,objRef,this));
-  };
+  }
   
   Timeline.prototype.play = function( frame ){
     this.frame = frame || (this.frame += this.speed);
@@ -97,26 +96,22 @@
       if( this.frame >= this.end){
         this.frame = this.end;
         this.parent.unload(this.name);
-        if(this.callback){this.callback();}
+        if(this.callback){this.callback(this.frame);}
       }
       if( this.frame <= this.start ){
         this.frame = this.start;
         this.parent.unload(this.name);
-        if(this.callback){this.callback();}
+        if(this.callback){this.callback(this.frame);}
       }
     }
-    var thisObject;
+    var thisObj;
     for( var i in this.objects ){
-      if( this.hasOwnProperty('objects') ){
-        thisObject = this.objects[i];
-        for( var j in thisObject.tracks ){
-          if( thisObject.hasOwnProperty('tracks') ){
-            thisObject.tracks[j].play( this.frame );
-          }
-        }
+      thisObject = this.objects[i];
+      for( var j in thisObject.tracks ){
+        thisObject.tracks[j].play( this.frame );
       }
-    }    
-    if( this.always ){ this.always.call(this); }
+    }
+    if( this.always ){ this.always.call(this,this.frame); }
   };  
 
   // Object / "Actor"
@@ -223,3 +218,4 @@
   global.burst = new Burst();
 
 })( this );
+

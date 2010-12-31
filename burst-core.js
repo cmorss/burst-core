@@ -45,6 +45,7 @@
 
   Burst.prototype.unload = function( name ){
     delete this.loaded[name];
+    return true;
   };
 
   Burst.prototype.play = function(){
@@ -95,12 +96,12 @@
     }else{
       if( this.frame >= this.end){
         this.frame = this.end;
-        this.parent.unload(this.name);
+        //this.parent.unload(this.name);
         if(this.callback){this.callback(this.frame);}
       }
       if( this.frame <= this.start ){
         this.frame = this.start;
-        this.parent.unload(this.name);
+        //this.parent.unload(this.name);
         if(this.callback){this.callback(this.frame);}
       }
     }
@@ -113,6 +114,7 @@
     }
     if( this.always ){ this.always.call(this,this.frame); }
   };  
+
 
   // Object / "Actor"
   //////////////////////////////////////////////////////////////////////////////
@@ -135,21 +137,22 @@
     this.parent=parent;
     this.keys=[];
     this.unit=typeof this.parent.objRef[prop] === 'number' ? undefined : this.parent.objRef[prop].replace(/[.0-9]/g,'');
+    this.alwaysCallback;
     return this;
   };
   
-  Track.prototype.key = function(frame,value,ease){
+  Track.prototype.key = function(frame,value,ease,callback){
     for(var i=0,l=this.keys.length;i<l;i++){
       if(this.keys[i].frame === frame){
         return this.keys[i];
       }
     }
     if(arguments.length>1){
-      var keyIndex=[], keyStack=[], thisKey = this.keys[this.keys.length] = new Key(frame,value,ease,this);
+      var keyIndex=[], keyStack=[], thisKey = this.keys[this.keys.length] = new Key(frame,value,ease,callback,this);
       for(i=0;i<this.keys.length;i++){
         keyIndex[i]=this.keys[i].frame;
       }
-      keyIndex.sort(sortNumber);      
+      keyIndex.sort(sortNumber);
       for(i=0;i<this.keys.length;i++){
         for(var j=0;j<this.keys.length;j++){
           if(keyIndex[i]==this.keys[j].frame){
@@ -180,20 +183,54 @@
           frame-curKey.frame,
           curKey.value,
           nextKey.value-curKey.value,
-          nextKey.frame-curKey.frame );                 
+          nextKey.frame-curKey.frame );
+          
+          if(this.lastKeyFired && this.lastKeyFired.frame != curKey.frame){
+            this.lastKeyFired.callbackFired = false;
+          }
+          
+          if(curKey.callback && !curKey.callbackFired){
+            curKey.callback.call(this.parent.objRef, {
+              frame      : frame,
+              prop       : this.prop,
+              burstTrack : this
+            });
+            curKey.callbackFired=true;
+            this.lastKeyFired = curKey;
+          }
+
       }else if( frame >= nextKey.frame || frame === 0 ){
         val = curKey.value;
       }
-    }    
+    }
+    if(this.alwaysCallback){
+      this.alwaysCallback.call(this.parent.objRef, {
+        frame      : frame,
+        prop       : this.prop,
+        burstTrack : this
+      });
+    }
     this.parent.objRef[this.prop] = val + (this.unit||0);
+  };
+
+  Track.prototype.always = function( func ){
+    this.alwaysCallback = func;
+    return this;
+  };
+
+  Track.prototype.obj=function(name,objRef){
+    var timeline = this.parent.parent;
+    return timeline.obj.call(timeline,name,objRef);
   };
 
   // Key
   //////////////////////////////////////////////////////////////////////////////
-  var Key = function Key(frame,value,ease,parent){
+  var Key = function Key(frame,value,ease,callback,parent){
     this.frame=frame;
     this.value=value;
-    this.ease=ease||'inOutCubic';
+    this.ease=ease||'linear';
+    this.callback=callback;
+    this.callbackFired=false;
     this.parent=parent;
     return this;
   };
@@ -208,9 +245,14 @@
     return obj.track.call(obj,name,objRef,prop);
   };
 
-  Key.prototype.key=function(frame,value,ease){
+  Key.prototype.key=function(frame,value,ease,callback){
     var track = this.parent;
-    return track.key.call(track,frame,value,ease);
+    return track.key.call(track,frame,value,ease,callback);
+  };
+
+  Key.prototype.always=function(func){
+    var track = this.parent;
+    return track.always.call(track,func);
   };
 
   // Instantiation

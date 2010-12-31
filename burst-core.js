@@ -63,7 +63,6 @@
       }
     }
   };
-
   Burst.prototype.stop = function(){
     window.clearInterval( this.interval );
     delete this.interval;
@@ -77,6 +76,7 @@
     this.start=this.frame=start;
     this.end=end;
     this.speed=speed;
+
     this.loop=loop;
     this.callback=callback;
     this.parent=parent;
@@ -259,5 +259,4 @@
   //////////////////////////////////////////////////////////////////////////////
   global.burst = new Burst();
 
-})( this );
-
+})( window );

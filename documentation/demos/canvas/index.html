@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<head>
+  <script src="../../../burst-core.js"></script>
+  <link rel="stylesheet" href="../demos.css" />
+</head>
+
+<body>
+  <canvas id="myCanvas" width="320" height="640"></canvas>
+</body>
+
+<script>
+(function( global, doc ){
+
+  function init(){
+    
+    var ctx = document.getElementById( 'myCanvas' ).getContext( '2d' ),
+
+        boxes = (function(){
+          var boxes = [];
+          for(var i=0; i < 32; i++){      
+            boxes[i] = {left:1};
+          }
+          return boxes;
+       })(),
+
+        drawLoop = global.setInterval( function(){
+          //drawBackground();
+          //drawBoxPaths();
+          drawBoxes();
+        }, 40 )
+        
+    ;
+
+    function drawBackground(){
+      ctx.fillStyle = "grey";
+      ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+    };
+
+    function drawBoxPaths(){
+      var origFrame = burst.timeline('myBoxAnimation').frame;
+      ctx.fillStyle = 'white';    
+      ctx.strokeStyle = 'white';      
+      for(var i=0; i < 32; i++){
+        var offsetY = 5+(i*20);
+        ctx.beginPath();
+        ctx.moveTo(5, offsetY);
+        for(var frame=5; frame < 100; frame++){           
+          frame--;
+          if(frame<0){ frame=1; }
+          burst.frame( frame-1 );
+          var offsetPrev = boxes[ i].left;
+          burst.frame( frame++ );
+          var offsetCur = boxes[ i].left;
+          ctx.lineTo( 320/100*frame, offsetY-Math.abs((offsetCur-offsetPrev)) );
+        }
+        ctx.stroke();
+      }
+      burst.timeline('myBoxAnimation').frame = origFrame;
+    };
+
+    function drawBoxes(){
+      var frame = burst.timeline('myBoxAnimation').frame;
+      for(var i=0; i < 32; i++){
+        /*var offsetY = 1+(i*20);
+        frame--;
+        if(frame<0){ frame=0; }
+        burst.frame( frame-1 );
+        var offsetPrev = boxes[ i].left;
+        burst.frame( frame++ );
+        var offsetCur = boxes[ i].left;
+        ctx.fillRect( boxes[i].left, offsetY-Math.abs((offsetCur-offsetPrev)), 8, 8 );
+        */
+        ctx.fillRect( boxes[i].left, 1+(i*20), 8, 8 );
+      }
+      //burst.play();
+    };
+
+    burst.timeline( 'myBoxAnimation', 1, 100, 1, true )
+      .obj('box01',boxes[ 0]).track('left').key(0,1,'step').key(100,310)
+      .obj('box02',boxes[ 1]).track('left').key(0,1,'linear').key(100,310)
+      .obj('box03',boxes[ 2]).track('left').key(0,1,'inOutQuad').key(100,310)
+      .obj('box04',boxes[ 3]).track('left').key(0,1,'inQuad').key(100,310)
+      .obj('box05',boxes[ 4]).track('left').key(0,1,'outQuad').key(100,310)
+      .obj('box06',boxes[ 5]).track('left').key(0,1,'inCubic').key(100,310)
+      .obj('box07',boxes[ 6]).track('left').key(0,1,'outCubic').key(100,310)
+      .obj('box08',boxes[ 7]).track('left').key(0,1,'inOutCubic').key(100,310)
+      .obj('box09',boxes[ 8]).track('left').key(0,1,'inQuart').key(100,310)
+      .obj('box10',boxes[ 9]).track('left').key(0,1,'outQuart').key(100,310)
+      .obj('box11',boxes[10]).track('left').key(0,1,'inOutQuart').key(100,310)
+      .obj('box12',boxes[11]).track('left').key(0,1,'inQuint').key(100,310)
+      .obj('box13',boxes[12]).track('left').key(0,1,'outQuint').key(100,310)
+      .obj('box14',boxes[13]).track('left').key(0,1,'inOutQuint').key(100,310)
+      .obj('box15',boxes[14]).track('left').key(0,1,'inSine').key(100,310)
+      .obj('box16',boxes[15]).track('left').key(0,1,'outSine').key(100,310)
+      .obj('box17',boxes[16]).track('left').key(0,1,'inOutSine').key(100,310)
+      .obj('box18',boxes[17]).track('left').key(0,1,'inExpo').key(100,310)
+      .obj('box19',boxes[18]).track('left').key(0,1,'outExpo').key(100,310)
+      .obj('box20',boxes[19]).track('left').key(0,1,'inOutExpo').key(100,310)
+      .obj('box21',boxes[20]).track('left').key(0,1,'inCirc').key(100,310)
+      .obj('box22',boxes[21]).track('left').key(0,1,'outCirc').key(100,310)
+      .obj('box23',boxes[22]).track('left').key(0,1,'inOutCirc').key(100,310)
+      .obj('box24',boxes[23]).track('left').key(0,1,'inElastic').key(100,310)
+      .obj('box25',boxes[24]).track('left').key(0,1,'outElastic').key(100,310)
+      .obj('box26',boxes[25]).track('left').key(0,1,'inOutElastic').key(100,310)
+      .obj('box27',boxes[26]).track('left').key(0,1,'inBack').key(100,310)
+      .obj('box28',boxes[27]).track('left').key(0,1,'outBack').key(100,310)
+      .obj('box29',boxes[28]).track('left').key(0,1,'inOutBack').key(100,310)
+      .obj('box30',boxes[29]).track('left').key(0,1,'inBounce').key(100,310)
+      .obj('box31',boxes[30]).track('left').key(0,1,'outBounce').key(100,310)
+      .obj('box32',boxes[31]).track('left').key(0,1,'inOutBounce').key(100,310)
+    ;
+
+    burst.load( 'myBoxAnimation' );
+    burst.play();
+
+  };
+
+  doc.addEventListener( 'DOMContentLoaded', function(){ init(); }, false );
+
+})( window, document );
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,80 @@
+
+
+body{
+  max-width:70em;
+  margin:20px auto;
+  min-width:610px;
+  font-family:verdana,sans-serif;
+  font-size:small;
+  line-height:1.3;
+}
+
+#mainContent{
+  float:right;
+  margin-bottom:1em;
+}
+
+pre{
+  background:none repeat scroll 0 0 #EEEEEE;
+  border:1px dashed #666666;
+  overflow:auto;
+  padding:15px 20px;
+}
+
+code,pre{
+  font-size:1em;
+}
+
+h2{
+  font-size:150%;
+  font-weight:normal;
+}
+
+h1,h2,h3,h4,h5,h6{
+  border-bottom:1px solid #CCCCCC;
+  font-family:arial,verdana,sans-serif;
+}
+
+
+canvas{
+  padding:0;
+  margin:0;
+}
+
+
+.demo-left{
+  float:left;
+  display:block;
+  margin-right:20px;
+  border:1px solid black;  
+  -moz-box-shadow: 5px 5px 10px #aaa;   
+  -webkit-box-shadow: 5px 5px 10px #aaa; 
+}
+
+table{
+  /*
+  border-collapse:collapse;
+  */
+  width:100%;
+}
+
+td,th{
+  padding:2px 5px;
+  text-align:left;
+}
+
+th{ 
+  text-align:right;
+  background: #ddd;
+}
+
+div.clear{clear:left;}
+
+div.fileinfo{
+  background:#fff;
+  border:1px dotted #aaa;
+  padding:10px 20px;
+  font-family:verdana,sans-serif;
+  margin:0;
+  white-space:normal!important;
+}

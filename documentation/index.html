@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<head>  
+  <title>Burst-Core Documentation</title>
+  <link rel="stylesheet" href="style.css" type="text/css" />
+  <script src="quad-tree.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+<h1>Burst-Core Documentation</h1>
+
+<h2>Table of Contents</h2>
+
+<ol>
+  <li>About Burst-Core</li>
+    <ol>
+      <li>What does Burst-Core do?</li>
+      <li>Classic Animation Arcitecture</li>
+      <li>Example of Syntax</li>
+      <li>History (The Burst Engine)</li>
+      <li>Details</li>
+    </ol>
+  </li>
+
+  <li>Burst-Core Demos
+    <ol>
+      <li>Canvas</li>
+      <li>Processing.js</li>
+      <li>WebGL</li>  
+      <li>Web Audio</li>
+      <li>DOM Elements</li>
+      <li>SVG Elements</li>
+    </ol>
+  </li>
+
+  <li>Patterns
+    <ol>
+      <li>Instantiation</li>
+      <li>Creating a Timeline</li>  
+      <li>Playing Back a Timeline</li>
+      <li>Using Callbacks</li>
+      <li>Animating multiple properties of one Object</li>
+      <li>"Always" Logic</li>
+      <li>Interface Map</li>
+    </ol>
+  </li>
+  
+  <li>Appendix of Functions
+    <ol>
+      <li>Burst</li>
+      <li>Timeline</li>  
+      <li>Object</li>
+      <li>Track</li>
+      <li>Key</li>
+      <li>Ease</li>
+    </ol>
+  </li>  
+
+</ol>
+
+<h3>About Burst-Core.js</h3>
+
+<h4>What does Burst-Core do?</h4>
+<p>Burst-Core.js delivers powerful time-line animation features in a sugary
+JavaScript shell. With Burst-Core you can build complex animations on the Web
+using a comprehensive set of simple commands. Burst-Core is designed to suit
+highly-complex, multi-layered, non-linear and functional animations.</p>
+
+<h4>Classic Animation Architecture</h4>
+<p>
+Burst-Core is based on a simple classic animation structure:
+<pre>
+Time-line > Object > Track > Key-frame > Property
+</pre>
+</p>
+
+<p>When you use Burst-Core, you create one or more Timelines. Timelines contain
+Objects. An Object is a JavaScript object, that contains the member-variables
+you wish to animate. For example: if you were making a game, you might want your
+main-character to be a game-sprite. Thus you would create a JavaScript object
+to contain your game-sprite.</p>
+
+<pre>
+myGameSprite = {
+  x       : 100,
+  y       : 100,
+  action  : 'walk',
+  draw    : function(){ ...
+};
+</pre>
+
+<p>Once you have added an Objects to the Timeline, you will want to animate the
+Object's properties (member-variables). You do this by creating Tracks. A Track
+is like a Timeline, except it contains Keys instead of Objects. The Track refers
+to the specific property or "member-variable" of the Object you are animating.
+</p>
+
+<p>Every Key that you add to the property track, contains the values of each
+property you wish to animate. For example: you might want to animate the left
+property of your game-sprite as it walks across the screen.</p>
+
+<p>To do this you would require 2 Keys. The first Key for the start-frame of the
+animation, with a left-property of 100 and another Key for the end-frame,
+telling Burst-Core to set the left-property to 200.</p>
+
+<p>The global Burst object is then used to control the animation of your
+Timeline. All the values for the frames in-between the Keys are calculated with
+easing values and callback functions for complex animations that can be
+reconfigured at run-time.  </p>
+
+<h4>Example of Syntax</h4>
+
+<pre>
+// Timeline args: timelineName, startFrame, endFrame, speedRatio, loop, callBack 
+burst.timeline( 'myTimeline', 0, 100, 1, false, function(){ alert('finished!'); } )
+
+  // Object args: name, objectReference
+  .obj( 'myDiv', document.getElementById( 'myDiv' ).style )    
+
+    // Track args: property to change over time
+    .track( 'left' )
+
+      // Key args: frameNumber, valueAtFrame, easeingMethod
+      .key(   0,   0, 'outBounce' )
+      .key( 100, 100 );
+</pre>
+
+<h4>History</h4>
+
+<p>Burst-Core started life named "The Burst Engine". The Burst Engine was an
+SVG-to-Canvas rendering project I created for making simple cartoons with SVG
+and JavaScript. The Burst Engine started back in 2008 before SVGs were
+cross-browser, and was a method to "plug-the-gap" that the lack of SVG support.
+</p>
+
+<p>A couple of years on, and SVG features have now rolled out, even as far as
+Microsoft Internet Explorer 9. At this stage in the Web's evolution, I no longer
+see a long-term need for a tool that renders SVG elements to the Canvas.</p>
+
+<p>The time-line features of the Burst Engine however, are the quintisential
+core features of any animation library. I also came to love the rapidity of the
+chaining syntax offered by The Burst Engine, and wanted to capture that magic in
+a light-weight JavaScript library.</p>
+
+<p>The Burst Engine died, Burst-Core was born.</p>
+
+<h4>Details</h4>
+<table>
+  <tr><th>Name</th><td>Burst-Core.js</td></tr>
+  <tr><th>Copyright</th><td>Copyright <a href="http://alistairgmacdonald.com">Alistair MacDonald</a> &copy; 2010</td></tr>
+  <tr><th>Author</th><td><a href="http://alistairgmacdonald.com/">Al MacDonald</a> (<a href="http://twitter.com/f1lter">F1LT3R</a>) at <a href="http://bocoup.com/">Bocoup</a></td></tr>
+  <tr><th>License</th><td><a href="http://creativecommons.org/licenses/by-sa/3.0/">http://creativecommons.org/licenses/by-sa/3.0/</a></td></tr>
+  <tr><th>Repo</th><td><a href="https://github.com/Bocoup/spacial-javascript">https://github.com/Bocoup/spacial-javascript</a></td></tr>
+</table>
+
+<h3>Burst-Core.js Demos</h3>
+<h3>Burst-Core.js Demonstations</h3>
+
+
+<span>By <a href="http://alistairgmacdonald.com/">Al MacDonald</a> (<a 
+href="http://twitter.com/f1lter">F1LT3R</a>) at <a 
+href="http://bocoup.com/">Bocoup</a></span>
+
+</body>

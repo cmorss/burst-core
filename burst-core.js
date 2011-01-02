@@ -49,7 +49,7 @@
 
   // Burst Instance
   //////////////////////////////////////////////////////////////////////////////
-  Burst = function Burst(){
+  function Burst(){
     this.timelines={};
     this.loaded={};
     this.fps = 30;
@@ -153,7 +153,7 @@
 
   // Object / "Actor"
   //////////////////////////////////////////////////////////////////////////////
-  var Obj = function Obj(name,objRef,parent){
+  function Obj(name,objRef,parent){
     this.name=name;
     this.objRef=objRef;
     this.parent=parent;
@@ -169,7 +169,7 @@
 
   // Track
   //////////////////////////////////////////////////////////////////////////////
-  var Track = function Track(prop,parent){
+  function Track(prop,parent){
     this.prop=prop;
     this.ease=ease;
     this.parent=parent;
@@ -265,7 +265,7 @@
 
   // Key
   //////////////////////////////////////////////////////////////////////////////
-  var Key = function Key(frame,value,ease,callback,parent){
+  function Key(frame,value,ease,callback,parent){
     this.frame=frame;
     this.value=value;
     this.ease=ease||'linear';

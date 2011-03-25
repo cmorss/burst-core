@@ -7,6 +7,16 @@
   //////////////////////////////////////////////////////////////////////////////
   function sortNumber(a,b){ return a - b; }
 
+  // Array Type-Check
+  //////////////////////////////////////////////////////////////////////////////
+  function isArray( obj ){
+    if( obj.constructor.toString().indexOf( 'Array' ) == -1 ){
+      return false;
+    }else{
+      return true;
+    }
+  };
+
   // Easing
   //////////////////////////////////////////////////////////////////////////////
   var ease = {
@@ -55,9 +65,135 @@
     this.fps = 30;
     this.timelineCount = 0;
     this.onframe=undefined;
+    this.exports = {};
+    this.on = true;
   };
 
   Burst_proto = Burst.prototype;
+
+  Burst_proto.getJSON = function( url ){
+    var AJAX = new window.XMLHttpRequest();
+    if( AJAX ){
+      AJAX.open( "GET", url + "?t=" + new Date().getTime(), false );
+      AJAX.send( null );
+      return AJAX.responseText;
+    }else{
+      return false;
+    }
+  };
+
+  Burst_proto.loadJSON = function( url, exportCallback, json ){
+    if(!json){
+      var json = JSON.parse( this.getJSON( url ) );
+    }
+    var timelineName, json_tl, timeline,
+        objectName, json_obj, objRef, obj,
+        tracks, track, keys, len, i, key
+    ;
+    for(timelineName in json){
+      json_tl = json[ timelineName ];
+      timeline = burst.timeline( timelineName, json_tl.start, json_tl.end, json_tl.speed, json_tl.looping );
+      json_obj = json[ timelineName ].objects;
+      for(objectName in json_obj){
+        objRef = json_obj[objectName].objRef;
+        this.exports[objRef] = {};
+        obj = timeline.obj( objectName, this.exports[objRef] );
+        tracks = json_obj[objectName].tracks;
+        for(trackName in tracks){
+          track = obj.track( trackName );
+          for(trackName in tracks){
+            keys = tracks[trackName];
+            len = keys.length;
+            for(i=0; i< len; i++){
+              key = keys[i];
+              if(i==0){
+                this.exports[objRef][trackName] = key[1];
+              }
+              track.key(key[0], key[1], key[2]||'linear');
+            }
+          }
+        }
+      }
+    }
+    exportCallback?exportCallback( this.exports ):0;
+    return json;
+  };
+  
+  Burst_proto.remove = function( timelineName ){
+    (function(){
+      var _timeline = burst.timeline( timelineName ),
+          objects   = _timeline.objects,
+          tracks, keys, key, i, j, l, v, o, tr
+      ;
+      for(_object in objects){
+        tracks = objects[_object].tracks;
+        for(_track in tracks){
+          keys = tracks[_track].keys;
+          for(_key in keys){
+            key = keys[_key];
+            delete key.aryLen;
+            delete key.callback;
+            delete key.callbackFired;
+            delete key.ease;
+            delete key.frame;
+            if(key.isArray){
+              v = key.value;
+              l = v.length;
+              for(i=0; i< l; i++){
+                delete v[i];
+              }
+            }
+            delete key.isArray;
+            delete key.isString;
+            delete key.parent;
+            delete key.value;
+            delete key.always;
+            delete key.key;
+            delete key.obj;
+            delete key.track;          
+          }
+          l = keys.length;
+          for(i=0; i< l; i++){
+            delete keys[i];
+          }
+        }
+        t = tracks[_track];
+        delete t.ease;
+        delete t.keys;
+        delete t.parent;
+        delete t.prop;
+        delete t.always;
+        delete t.key;
+        delete t.obj;
+        delete t.play;
+        o = objects[_object];
+        delete o.name;
+        delete o.objRef;
+        delete o.parent;
+        for(tr in o.tracks){
+          delete o.tracks[tr];
+        }
+        delete o.tracks;
+        t = _timeline;
+        delete t.callback;
+        delete t.end;
+        delete t.frame;
+        delete t.loop;
+        delete t.name;
+        for(tr in t.objects){
+          delete t.objects[tr];
+        }
+        delete t.objects;
+        delete t.speed;
+        delete t.start;
+        delete t.obj;
+        delete t.play;
+        delete t.parent;
+      } 
+      delete burst.timelines[timelineName];
+      return true;
+    })();
+  };
 
   Burst_proto.timeline = function(name,start,end,speed,loop,callback){
     return this.timelines[name]||(arguments.length>1?this.timelines[name]=new Timeline(name,start,end,speed,loop,callback,this):undefined);
@@ -174,7 +310,7 @@
     this.ease=ease;
     this.parent=parent;
     this.keys=[];
-    this.unit=typeof this.parent.objRef[prop] === 'number' ? undefined : this.parent.objRef[prop].replace(/[.0-9]/g,'');
+    //this.unit=typeof this.parent.objRef[prop] === 'number' ? undefined : this.parent.objRef[prop].replace(/[.0-9]/g,'');
     this.alwaysCallback;
     return this;
   };
@@ -211,7 +347,7 @@
   };
 
   Track_proto.play = function(frame){
-    var curKey, nextKey, val;
+    var curKey, nextKey, val, indice, aryLen;
     for(var i=0, l=this.keys.length; i<l; i++){
       curKey = this.keys[i];
       nextKey = this.keys[i+1];
@@ -219,11 +355,27 @@
         nextKey = this.keys[l-1];
       }
       if( frame >= curKey.frame && frame < nextKey.frame ){
-         val = this.ease[ curKey.ease ]( 0,
-          frame-curKey.frame,
-          curKey.value,
-          nextKey.value-curKey.value,
-          nextKey.frame-curKey.frame );
+
+          if( curKey.isArray ){
+            aryLen = curKey.aryLen;
+            for(indice=0; indice< aryLen; indice++){
+              val = this.ease[ curKey.ease ]( 0,
+              frame-curKey.frame,
+              curKey.value[ indice ],
+              nextKey.value[ indice ]-curKey.value[ indice ],
+              nextKey.frame-curKey.frame );
+              this.parent.objRef[this.prop][ indice ] = val;
+            }
+          }else if( curKey.isString ){
+            this.parent.objRef[this.prop] = curKey.value;
+          }else{ 
+            val = this.ease[ curKey.ease ]( 0,
+            frame-curKey.frame,
+            curKey.value,
+            nextKey.value-curKey.value,
+            nextKey.frame-curKey.frame );
+            this.parent.objRef[this.prop] = val;
+          }
           
           if(this.lastKeyFired && this.lastKeyFired.frame != curKey.frame){
             this.lastKeyFired.callbackFired = false;
@@ -240,7 +392,14 @@
           }
 
       }else if( frame >= nextKey.frame || frame === 0 ){
-        val = curKey.value;
+        if( curKey.isArray ){
+          aryLen = curKey.aryLen;
+          for(indice=0; indice< aryLen; indice++){
+            this.parent.objRef[this.prop][ indice ] = curKey.value[ indice ];
+          }
+        }else{
+         this.parent.objRef[this.prop][ indice ] = curKey.value;
+        }
       }
     }
     if(this.alwaysCallback){
@@ -250,7 +409,6 @@
         burstTrack : this
       });
     }
-    this.parent.objRef[this.prop] = val + (this.unit||'');
   };
 
   Track_proto.always = function( func ){
@@ -267,7 +425,14 @@
   //////////////////////////////////////////////////////////////////////////////
   function Key(frame,value,ease,callback,parent){
     this.frame=frame;
-    this.value=value;
+    this.value=value; 
+    if( isArray( value ) ){
+      this.isArray = true;
+      this.aryLen = value.length;
+    }
+    if( typeof value == 'string' ){
+      this.isString = true;
+    }
     this.ease=ease||'linear';
     this.callback=callback;
     this.callbackFired=false;
@@ -299,6 +464,6 @@
 
   // Instantiation
   //////////////////////////////////////////////////////////////////////////////
-  global.burst = new Burst();
+  var burst = window.burst = new Burst();
 
 })( window, document );
